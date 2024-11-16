@@ -44,16 +44,35 @@ client.on(Events.InteractionCreate, async interaction => {
 			// 获取用户选项
 			const targetUser = interaction.options.getUser('user'); // 参数名为 'user'
 			const message = interaction.options.getString('message'); // 参数名为 'message'
-
+			const sendNum = interaction.options.getNumber('sendnum'); // 参数名为 'sendnum'
 			if (!targetUser) {
 				return interaction.reply({ content: '未指定用户！', ephemeral: true });
 			}
 
 			// 发送私信
 			try {
-				await interaction.deferReply({ ephemeral: true });
-				await targetUser.send(`你收到了来自 ${interaction.user.globalName} 的悄悄话：${message || '没有附加消息'}`);
-				await interaction.editReply({ content: `悄悄话已发送给 ${targetUser.globalName}！`, ephemeral: true });
+				if(!sendNum){
+					await interaction.deferReply({ ephemeral: true });
+					await targetUser.send(`你收到了来自 ${interaction.user.globalName} 的悄悄话：${message || '没有附加消息'}`);
+					await interaction.editReply({ content: `悄悄话已发送给 ${targetUser.globalName}！`, ephemeral: true });
+				}
+				else{
+					if(sendNum > 10){
+						await interaction.deferReply({ ephemeral: true });
+						await interaction.editReply({ content: `超出信息攻击范围！`, ephemeral: true });
+					}
+					else
+					{
+						// Loop for sendNum messages
+						await interaction.deferReply({ ephemeral: true });
+						for (let i = 0; i < sendNum; i++) {
+							await targetUser.send(`你收到了来自 ${interaction.user.globalName} 的悄悄话：${message || '没有附加消息'}`);
+							// Optional: You can add a delay if needed between each message, for example:
+							await new Promise(resolve => setTimeout(resolve, 1000)); // Delay for 1 second between messages
+						}
+						await interaction.editReply({ content: `${sendNum} 条悄悄话已发送给 ${targetUser.globalName}！`, ephemeral: true });
+					}
+				}
 			} catch (err) {
 				await interaction.reply({ content: `无法发送消息给 ${targetUser.tag}，可能对方关闭了私信功能。`, ephemeral: true });
 			}
