@@ -39,6 +39,8 @@ client.on(Events.InteractionCreate, async interaction => {
 	try{
 
 		if (!interaction.isChatInputCommand()) return;
+
+		// /ping
 		if (interaction.commandName === 'ping') {
 
 			// 获取用户选项
@@ -75,6 +77,26 @@ client.on(Events.InteractionCreate, async interaction => {
 				}
 			} catch (err) {
 				await interaction.reply({ content: `无法发送消息给 ${targetUser.tag}，可能对方关闭了私信功能。`, ephemeral: true });
+			}
+		}
+		// /mute
+		else if(interaction.commandName === 'mute'){
+
+			try{
+
+				const targetUser = interaction.options.getUser('user'); // 参数名为 'user'
+				const member = await interaction.guild.members.fetch(targetUser.id);
+				//console.log(member.permissions.toArray()); // 打印目标用户的所有权限
+				console.log("````````````````````")
+				if (!targetUser) {
+					return interaction.reply({ content: '未指定用户！', ephemeral: true });
+				}	
+				await member.timeout(10000, `由 ${interaction.user.tag} 禁言`); // 禁言用户
+				await interaction.reply({ content: `${targetUser.globalName} 已被禁言 1 分钟。`, ephemeral: true });
+
+			}
+			catch(err){
+				console.error(err)
 			}
 		}
 	}
